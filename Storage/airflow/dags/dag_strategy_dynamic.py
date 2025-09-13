@@ -45,23 +45,47 @@ def create_dag(dag_id,
         return dag
 schedule = None #"@daily"
 dag_id = "strategy_dynamic_DAG"
-s3 = boto3.client('s3',endpoint_url="http://minio-image:9000",aws_access_key_id="minio-image",aws_secret_access_key="minio-image-pass")
-Bucket="airflow-files"
-Key="strategy.csv"
-read_file = s3.get_object(Bucket=Bucket, Key=Key)
-df = pd.read_csv(read_file['Body'],sep=',')
 
-df.fillna('', inplace=True)
-args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date':datetime(2019,1,1),
-    # 'start_date': datetime.now(),
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=1),
-    'concurrency': 1,
-    'max_active_runs': 1
-}
-globals()[dag_id] = create_dag(dag_id, schedule, args, df)
+# Try to read the strategy file, but handle errors gracefully
+try:
+    s3 = boto3.client('s3',endpoint_url="http://minio-image:9000",aws_access_key_id="minio-image",aws_secret_access_key="minio-image-pass")
+    Bucket="airflow-files"
+    Key="strategy.csv"
+    read_file = s3.get_object(Bucket=Bucket, Key=Key)
+    df = pd.read_csv(read_file['Body'],sep=',')
+    df.fillna('', inplace=True)
+    
+    args = {
+        'owner': 'admin',
+        'depends_on_past': False,
+        'start_date':datetime(2019,1,1),
+        # 'start_date': datetime.now(),
+        'email_on_failure': False,
+        'email_on_retry': False,
+        'retries': 1,
+        'retry_delay': timedelta(minutes=1),
+        'concurrency': 1,
+        'max_active_runs': 1
+    }
+    globals()[dag_id] = create_dag(dag_id, schedule, args, df)
+    
+except Exception as e:
+    print(f"Warning: Could not load strategy.csv from S3: {e}")
+    print("Creating a default DAG without strategy configuration")
+    
+    # Create a default DAG with empty dataframe
+    df = pd.DataFrame({'Strategy': ['Default'], 'Mode': ['1'], 'Securities': ['EUR_USD'], 
+                      'Token': ['default'], 'Account': ['default'], 'Model ID': [''], 'Strategy Parameters': ['']})
+    
+    args = {
+        'owner': 'admin',
+        'depends_on_past': False,
+        'start_date':datetime(2019,1,1),
+        'email_on_failure': False,
+        'email_on_retry': False,
+        'retries': 1,
+        'retry_delay': timedelta(minutes=1),
+        'concurrency': 1,
+        'max_active_runs': 1
+    }
+    globals()[dag_id] = create_dag(dag_id, schedule, args, df)

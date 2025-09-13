@@ -7,7 +7,7 @@ from db_pack.oanda import fx_oanda_daily
 from db_pack.oanda import fx_oanda_minute
 
 DAG_DEFAULT_ARGS={
-    'owner':'airflow',
+    'owner':'admin',
     'depends_on_past':False,
     'retries':1,
     'retry_delay':timedelta(minutes=1)

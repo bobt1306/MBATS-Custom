@@ -87,10 +87,9 @@ services:
         image: dpage/pgadmin4
         container_name: "pgadmin"
         environment:
-            PGADMIN_DEFAULT_EMAIL: "guest"
-            PGADMIN_DEFAULT_PASSWORD: "guest"
-        volumes:
-            - ${WD}/pgadmin/:/var/lib/pgadmin 
+            PGADMIN_DEFAULT_EMAIL: "admin@example.com"
+            PGADMIN_DEFAULT_PASSWORD: "admin"
+            PGADMIN_CONFIG_SERVER_MODE: "False"
         ports:
             - 1234:80
         depends_on:
@@ -119,8 +118,8 @@ services:
             - EXECUTOR=Local
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
         volumes:
-            - ${WD}/airflow/dags:/usr/local/airflow/dags
-            - ${WD}/q_pack:/usr/local/airflow/dags/q_pack
+            - ${WD}/airflow/dags:/opt/airflow/dags
+            - ${WD}/q_pack:/opt/airflow/dags/q_pack
         ports:
             - 8080:8080
         command: webserver

@@ -1,8 +1,11 @@
-# FROM python:3.7
-FROM continuumio/miniconda
+FROM python:3.9-slim
 
-MAINTAINER Wilder Rodrigues (wilder.rodrigues@ekholabs.ai)
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
+# Copy and install requirements
 COPY requirements.txt /tmp/
 RUN pip install --requirement /tmp/requirements.txt
 

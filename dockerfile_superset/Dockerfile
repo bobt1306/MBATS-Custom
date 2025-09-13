@@ -1,3 +1,2 @@
-FROM amancevice/superset
+FROM amancevice/superset:4.1.2
 
-MAINTAINER Saeed Rahman
